@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" media="all">
+        <link rel="stylesheet" type="text/css" href="js/jquery-ui/jquery-ui.min.css">
+        <script type="text/javascript" src="js/jquery/jquery.min.js"></script>
+        <script type="text/javascript" src="js/jquery-ui/jquery-ui.js"></script>
+        <script type="text/javascript" src="js/player.js"></script>
+        <script type="text/javascript">
+        var PlayerHud = new PlayerHud();
+        $( document ).ready(function() {
+
+            $(".radiostation-logo").mouseover(function(){
+                if( PlayerHud.isPlaying == 0)
+                {
+                    $(this).addClass('play');
+                }
+                else
+                {
+                    if( PlayerHud.getClicked().attr('data-uid') == $(this).attr('data-uid'))
+                    {
+                        $(this).addClass('stop');
+                    }
+                    else
+                    {
+                        $(this).addClass('play');
+                    }
+                }
+
+            });
+
+            $(".radiostation-logo").mouseout(function(){
+                $(this).removeClass('play');
+                $(this).removeClass('stop');
+            });
+
+            $(".radiostation-logo").click(function(e){
+                if( PlayerHud.isPlaying == 0)
+                {
+                    $(this).find('.status').text(0);
+                    $(this).find('.status').show("fast");
+
+                    try {
+                            PlayerHud.play($(this));
+                    }
+                    catch(err) {
+                        console.log("Object or method not exists: " + err);
+                    }
+
+                }
+                else
+                {
+                    if( PlayerHud.getClicked().attr('data-uid') == $(this).attr('data-uid'))
+                    {
+                        PlayerHud.stop();
+                    }
+                    else
+                    {
+                        $(this).find('.status').text(0);
+                        $(this).find('.status').show("fast");
+                        PlayerHud.play($(this));
+                    }
+                }
+            });
+            $( "#slider" ).slider({
+                value: 60,
+                orientation: "vertical",
+                range: "min",
+                animate: true,
+                min: 0,
+                max: 1,
+                step: 0.1,
+                slide: function( event, ui ) {
+                  $( "#current-volume" ).val( ui.value*100 );
+                  PlayerHud.setVolume(ui.value);
+                }
+            });
+            $( "#current-volume" ).val( $( "#slider" ).slider( "value" )*100 );
+
+        });
+        </script>
+    </head>
+    <body>
+        <div class="radiostations">
+            <a id="jedynka" class="radiostation-logo" data-uid="1"><span class="status"></span><span class="stop hidden"></span></a>
+            <a id="dwojka" class="radiostation-logo" data-uid="2"><span class="status"></span><span class="stop hidden"></span></a>
+            <a id="trojka" class="radiostation-logo" data-uid="3"><span class="status"></span><span class="stop hidden"></span></a>
+            <a id="czworka" class="radiostation-logo" data-uid="4"><span class="status"></span><span class="stop hidden"></span></a>
+            <a id="antyradio" class="radiostation-logo" data-uid="antyradio"><span class="status"></span><span class="stop hidden"></span></a>
+        </div>
+        <div class="controls">
+            <p>
+              <input type="text" id="current-volume" readonly>
+            </p>
+            <div id="slider"></div>
+        </div>
+    </body>
+</html>

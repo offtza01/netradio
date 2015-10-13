@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>html/images/czworka.jpg</file>
+        <file>html/images/trojka.jpg</file>
+        <file>html/images/dwojka.jpg</file>
+        <file>html/images/antyradio.jpg</file>
+        <file>html/images/jedynka.jpg</file>
+    </qresource>
+    <qresource prefix="/lib">
+        <file>lib/libbass.so</file>
+    </qresource>
+</RCC>

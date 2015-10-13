@@ -1,0 +1,91 @@
+body {
+    background-color: #FFF
+}
+
+div.radiostations {
+    text-align: center;
+    margin: auto;
+    width: 50%;
+}
+
+span.status {
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  color: #FFF;
+  font-weight: bold;
+  font-family: Arial, Georgia, Serif;
+  font-size: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+a {
+    width: 64px;
+    height: 64px;
+    display: block-inline;
+    float: left;
+    margin: 4px;
+    position: relative;
+}
+
+a#jedynka {
+    background: url('../images/jedynka.jpg') no-repeat;
+}
+a#dwojka {
+    background: url('../images/dwojka.jpg') no-repeat;
+}
+a#trojka {
+    background: url('../images/trojka.jpg') no-repeat;
+}
+a#czworka {
+    background: url('../images/czworka.jpg') no-repeat;
+}
+a#antyradio {
+    background: url('../images/antyradio.jpg') no-repeat;
+}
+
+.play {
+    background: url('../images/play.png') no-repeat !important;
+}
+
+.play span.status {
+    color: #000;
+}
+
+.stop {
+    background: url('../images/stop.png') no-repeat !important;
+}
+
+.play span.status {
+    color: #000;
+}
+
+#dupa {
+    background-color: #CCC;
+    border: 1px solid red;
+    width: 90%;
+    height: 300px;
+
+}
+
+.clear {
+    clear: both;
+}
+
+.controls {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    width: 30px;
+}
+
+.controls p input{
+    width: 30px;
+    color: #f6931f;
+    border: 0;
+    font-size: 10px;
+    width: 20px;
+}
