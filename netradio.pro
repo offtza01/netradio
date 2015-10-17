@@ -15,7 +15,8 @@ QT += network
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
     player.cpp \
-    acrcloud.cpp
+    acrcloud.cpp \
+    crypto.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(html5applicationviewer/html5applicationviewer.pri)
@@ -24,7 +25,8 @@ qtcAddDeployment()
 HEADERS += \
     bass.h \
     player.h \
-    acrcloud.h
+    acrcloud.h \
+    crypto.h
 
 RESOURCES += \
     resource.qrc

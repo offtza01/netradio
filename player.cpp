@@ -141,6 +141,8 @@ void Player::setVolume(float volume)
 
 void Player::record()
 {
+    acr.sendRequest("afile.mp3");
+    return;
     stopRecording();
     QTimer::singleShot(recordTime*1000, this, SLOT(stopRecording()));
     isRecording = true;
@@ -153,6 +155,7 @@ void Player::stopRecording()
     if( recordFile != NULL)
     {
         fclose(recordFile);
+        acr.sendRequest("afile.mp3");
         recordFile = NULL;
     }
 }
