@@ -6,29 +6,41 @@
 #include <QEventLoop>
 #include <QMap>
 #include <QWebView>
+#include <QTimer>
+#include <QTime>
 #include "bass.h"
 #include "html5applicationviewer/html5applicationviewer.h"
+#include "acrcloud.h"
 
 class Player : public Html5ApplicationViewer
 {
     Q_OBJECT
 public:
     explicit Player(QWidget *parent = 0);
+    static FILE *recordFile;
+    static bool isRecording;
+    static const int recordTime;
+
 private:
     HSTREAM stream;
+    HRECORD rstream;
     bool playStatus;
     QTimer *timer;
     QMap<QString, QString> playList;
     static void StatusProc(const void *buffer, DWORD length, void *user);
+    static void MyDownload(const void *buffer, DWORD length, void *user);
+    ACRCloud acr;
 
 private slots:
     void addToJavaScript();
     bool PrebufTimerProc();
+    void stopRecording();
 
 public slots:
     void play(QString stationId="unknown");
     void setVolume(float volume);
     void stop();
+    void record();
 };
 
 #endif // PLAYER_H

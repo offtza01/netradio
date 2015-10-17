@@ -1,5 +1,11 @@
 #include "player.h"
 
+FILE * Player::recordFile = NULL;
+const int Player::recordTime = 10;
+bool Player::isRecording = false;
+
+
+
 Player::Player(QWidget *parent) :Html5ApplicationViewer(parent) {
     QObject::connect(webView()->page()->mainFrame(),
             SIGNAL(javaScriptWindowObjectCleared()), SLOT(addToJavaScript()));
@@ -18,10 +24,11 @@ Player::Player(QWidget *parent) :Html5ApplicationViewer(parent) {
     playList.insert("3", "http://stream3.polskieradio.pl:8904/;stream");
     playList.insert("4", "http://mp3.polskieradio.pl:8906/;stream");
     playList.insert("antyradio", "http://ant-waw.cdn.eurozet.pl:8602/;stream");
+    Player::recordFile = NULL;
 
-
-
+    acr.loadSettings();
 }
+
 
 void Player::addToJavaScript() {
     webView()->page()->mainFrame()->addToJavaScriptWindowObject("Player", this);
@@ -54,9 +61,24 @@ bool Player::PrebufTimerProc()
         }
 }
 
+void CALLBACK Player::MyDownload(const void *buffer, DWORD length, void *user)
+{
+    if( isRecording == false) return;
+    if (!recordFile){
+        recordFile=fopen("afile.mp3", "wb"); // create the file
+    }
+    if (!buffer){
+        fclose(recordFile); // finished downloading
+    }
+    else
+    {
+        fwrite(buffer, 1, length, recordFile);
+    }
+}
+
+
 void CALLBACK Player::StatusProc(const void *buffer, DWORD length, void *user)
 {
-
         if (buffer && !length ) { // got HTTP/ICY tags, and this is still the current request
             qDebug() << buffer;
         }
@@ -72,7 +94,7 @@ void Player::play(QString stationId) {
     }
     qDebug() << "click " << playList.value(stationId) << "transform: " << playList.value(stationId).toStdString().c_str() << "\n";
 
-    HSTREAM stream = BASS_StreamCreateURL(playList.value(stationId).toStdString().c_str(),0,BASS_STREAM_BLOCK|BASS_STREAM_STATUS|BASS_STREAM_AUTOFREE,0,0);
+    HSTREAM stream = BASS_StreamCreateURL(playList.value(stationId).toStdString().c_str(),0,BASS_STREAM_BLOCK|BASS_STREAM_STATUS|BASS_STREAM_AUTOFREE,MyDownload,0);
 
     BASS_Start();
 
@@ -96,10 +118,8 @@ void Player::play(QString stationId) {
     }
     else
     {
-        //timer->start(1000);
         qDebug() << BASS_ErrorGetCode();
         return;
-        //prebuftimer=g_timeout_add(50,PrebufTimerProc,NULL);
     }
     return;
 }
@@ -119,3 +139,20 @@ void Player::setVolume(float volume)
 }
 
 
+void Player::record()
+{
+    stopRecording();
+    QTimer::singleShot(recordTime*1000, this, SLOT(stopRecording()));
+    isRecording = true;
+}
+
+void Player::stopRecording()
+{
+    if( isRecording == false) return;
+    isRecording = false;
+    if( recordFile != NULL)
+    {
+        fclose(recordFile);
+        recordFile = NULL;
+    }
+}

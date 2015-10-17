@@ -63,6 +63,12 @@
                     }
                 }
             });
+            $('#record').click(function(e){
+                if( PlayerHud.isPlaying == 1)
+                {
+                    PlayerHud.record();
+                }
+            });
             $( "#slider" ).slider({
                 value: 60,
                 orientation: "vertical",
@@ -94,6 +100,7 @@
               <input type="text" id="current-volume" readonly>
             </p>
             <div id="slider"></div>
+            <div id="record">Rec</div>
         </div>
     </body>
 </html>

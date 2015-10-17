@@ -3,10 +3,9 @@
 #include "html5applicationviewer.h"
 #include "player.h"
 
-
 #ifdef QT_DEBUG
-#include <QDebug>
-#include <QWebInspector>
+    #include <QDebug>
+    #include <QWebInspector>
 #endif
 
 

@@ -23,8 +23,6 @@ PlayerHud.prototype = {
         this.playingObj = clickedObj;
         this.playingUid = this.playingObj.attr('data-uid');
         Player.play(this.playingUid);
-
-
     },
 
     stop: function() {
@@ -40,5 +38,12 @@ PlayerHud.prototype = {
     setVolume: function(volume) {
         this.volume = volume;
         Player.setVolume(volume);
+    },
+
+    record: function(){
+        if( this.isPlaying)
+        {
+            Player.record();
+        }
     }
 };
