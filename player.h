@@ -9,6 +9,8 @@
 #include <QTimer>
 #include <QTime>
 #include <QDir>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include "bass.h"
 #include "html5applicationviewer/html5applicationviewer.h"
 #include "acrcloud.h"

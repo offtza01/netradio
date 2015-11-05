@@ -132,6 +132,22 @@ void Player::play(QString stationId) {
             }
 
         }
+        const char *meta=BASS_ChannelGetTags(stream,BASS_TAG_META);
+        if( !meta)
+        {
+            meta = BASS_ChannelGetTags(stream,BASS_TAG_OGG);
+        }
+        if( meta)
+        {
+            qDebug() << meta;
+            QRegularExpression rx("StreamTitle='(.+)';StreamUrl");
+            QRegularExpressionMatch match = rx.match(QString(meta));
+            QString retMsg;
+            if (match.hasMatch()) {
+                qDebug() << match.captured(1);
+                webView()->page()->mainFrame()->evaluateJavaScript("setRadiostationTag('"+ match.captured(1) +"')");
+            }
+        }
         BASS_ChannelPlay(stream,FALSE);
         playStatus = true;
 

@@ -30,6 +30,4 @@ QString Crypto::hmacSha1(QByteArray key, QByteArray baseString)
     total.append(QCryptographicHash::hash(part, QCryptographicHash::Sha1));
     QByteArray hashed = QCryptographicHash::hash(total, QCryptographicHash::Sha1);
     return hashed.toBase64();
-    //return "qeS+HMrH7diSqqIozxlzqoc5uOg=";
-    //return hashed.toBase64();
 }

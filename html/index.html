@@ -13,7 +13,7 @@
         function play(elem)
         {
             PlayerHud.play(elem);
-            $('#record-controls').slideDown('slow');
+            $('#record-navigation').slideDown('slow');
             enableExternalContent(elem);
         }        
 
@@ -54,6 +54,18 @@
             $("#record-notice").hide();
             $("#record-notice").text(message);
             $("#record-notice").slideDown("slow");
+            $("#record-notice").hide("slow");
+        }
+
+        function setRadiostationTag(message)
+        {
+            if (message === undefined) {
+                $('#radiostation-tag span').text("");
+            }
+            else
+            {
+                $('#radiostation-tag span').text(message);
+            }
         }
 
         $( document ).ready(function() {
@@ -83,6 +95,7 @@
 
             $(".radiostation-logo").click(function(e){
                 e.preventDefault();
+                setRadiostationTag();
                 if( PlayerHud.isPlaying == 0)
                 {
                     $(this).find('.status').text(0);
@@ -100,7 +113,7 @@
                     if( PlayerHud.getClicked().attr('data-uid') == $(this).attr('data-uid'))
                     {
                         PlayerHud.stop();
-                        $('#record-controls').hide();
+                        $('#record-navigation').hide();
                     }
                     else
                     {
@@ -148,9 +161,14 @@
         </div>
         <div class="clear"></div>
         <div id="record-controls" class="record-controls">
-            <span><a id="recordBtn" href="#" class="record-button"></a></span>
-            <div class="clear"></div>
-            <div id="record-notice" class="record-notice"></div>
+            <div id="record-navigation" class="record-navigation hidden">
+                <span><a id="recordBtn" href="#" class="record-button"></a></span>
+                <div class="clear"></div>
+                <div id="record-notice" class="record-notice"></div>
+            </div>
+        </div>
+        <div id="radiostation-tag" class="radiostation-tag">
+            <span></span>
         </div>
         <div class="controls">
             <div id="slider"></div>

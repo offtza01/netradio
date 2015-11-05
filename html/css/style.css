@@ -82,12 +82,16 @@ a#antyradio {
     width: 20px;
 }
 
-.record-controls {
+.record-controls, .radiostation-tag {
     height: 70px;
     width: 50%;
     text-align: center;
     margin: auto;
     font-size: 12px;
+}
+
+.radiostation-tag {
+    height: 30px;
 }
 
 .record-button {
@@ -109,5 +113,9 @@ a#antyradio {
     width: 100%;
     height: 100%;
     border: none;
+}
+
+#radiostation-tag {
+    //border: 1px solid red;
 }
 
