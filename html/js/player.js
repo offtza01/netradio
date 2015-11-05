@@ -3,6 +3,7 @@ PlayerHud.prototype = {
     playingObj: null,
     playingUid: null,
     isPlaying: 0,
+    isRecording: 0,
     volume: 100,
 
     updateBufforStatus: function(status) {

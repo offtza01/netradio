@@ -2,6 +2,7 @@
 #define CRYPTO_H
 
 #include <QObject>
+#include <QDebug>
 #include <QCryptographicHash>
 
 class Crypto : public QObject

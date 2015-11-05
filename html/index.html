@@ -31,13 +31,22 @@
         function enableExternalContent(elem)
         {
             var href = elem.attr("href");
-            console.log(href);
             if (typeof href !== "undefined" && href !== false && href.length != 0)
             {
                 $('.youtube-content').hide();
                 $('#external-content-view').attr("src", href);
                 $('.external-content').show();
             }
+        }
+
+        function disablePlaylistClicking()
+        {
+            $(".radiostation-logo").css("pointer-events", "none");
+        }
+
+        function enablePlaylistClicking()
+        {
+            $(".radiostation-logo").css("pointer-events", "auto");
         }
 
         function setRecordNotice(message)
@@ -121,6 +130,7 @@
                 e.preventDefault();
                 if( PlayerHud.isPlaying == 1)
                 {
+                    disablePlaylistClicking();
                     PlayerHud.record();
                     setRecordNotice("Nagrywanie...");
                 }
@@ -133,8 +143,8 @@
             <a id="jedynka" class="radiostation-logo" data-uid="1"><span class="status"></span><span class="stop hidden"></span></a>
             <a id="dwojka" class="radiostation-logo" data-uid="2"><span class="status"></span><span class="stop hidden"></span></a>
             <a id="trojka" class="radiostation-logo" data-uid="3"><span class="status"></span><span class="stop hidden"></span></a>
-            <a id="czworka" class="radiostation-logo" data-uid="4" href="https://www.polskieradio.pl/10,Czworka"><span class="status"></span><span class="stop hidden"></span></a>
-            <a id="antyradio" class="radiostation-logo" data-uid="antyradio" href="http://wykop.pl"><span class="status"></span><span class="stop hidden"></span></a>
+            <a id="czworka" class="radiostation-logo" data-uid="4"><span class="status"></span><span class="stop hidden"></span></a> <!-- href="https://www.polskieradio.pl/10,Czworka" -->
+            <a id="antyradio" class="radiostation-logo" data-uid="antyradio"><span class="status"></span><span class="stop hidden"></span></a>
         </div>
         <div class="clear"></div>
         <div id="record-controls" class="record-controls">

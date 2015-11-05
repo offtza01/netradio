@@ -1,7 +1,7 @@
 #include "acrcloud.h"
 
-const QString ACRCloud::account_access_key = "XXXXX";
-const QString ACRCloud::account_access_secret = "XXXX";
+const QString ACRCloud::account_access_key = "xxx";
+const QString ACRCloud::account_access_secret = "xxx";
 
 ACRCloud::ACRCloud(QObject *parent) :
     QObject(parent)
@@ -37,7 +37,6 @@ void ACRCloud::serviceRequestFinished(QNetworkReply *networkReply)
         }
     }
     qDebug() << networkReply->readAll();
-    qDebug() << "getAllCookies: " << cookieJar->getAllCookies();
     emit songFound(s);
 }
 
@@ -64,7 +63,10 @@ int ACRCloud::sendRequest(QString mp3FilePath)
             + signatureVersion + "\n"
             + QString::number(timestamp.toMSecsSinceEpoch());
     stringToSign = stringToSign.replace("+", "%2B");
-    QString signature = Crypto::hmacSha1(account_access_key.toUtf8(), stringToSign.toUtf8());
+    QString signature = Crypto::hmacSha1(account_access_secret.toUtf8(), stringToSign.toUtf8());
+    qDebug() << "signature";
+    qDebug() << signature;
+
     QFile mp3FileName(mp3FilePath);
 
     if( !mp3FileName.exists()) return 1;

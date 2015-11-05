@@ -2,7 +2,7 @@
 
 FILE * Player::recordFileH = NULL;
 QString Player::recordFilePath = NULL;
-const int Player::recordTime = 12;
+const int Player::recordTime = 10;
 bool Player::isRecording = false;
 
 
@@ -45,6 +45,7 @@ void Player::songFound(QJsonObject song)
     {
         webView()->page()->mainFrame()->evaluateJavaScript(QString("setRecordNotice(\"Utwór nie został rozpoznany :(\")"));
     }
+    webView()->page()->mainFrame()->evaluateJavaScript(QString("enablePlaylistClicking()"));
 }
 
 
