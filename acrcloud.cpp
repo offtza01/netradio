@@ -1,23 +1,44 @@
 #include "acrcloud.h"
 
-const QString ACRCloud::account_access_key = "9d1da76a80fbd5b98a1feded565eefdc";
-const QString ACRCloud::account_access_secret = "ImseawxlhKkayRRYy8ucoYqhU9Jbx4F7xCzTqrT9";
+const QString ACRCloud::account_access_key = "XXXXX";
+const QString ACRCloud::account_access_secret = "XXXX";
 
 ACRCloud::ACRCloud(QObject *parent) :
     QObject(parent)
 {
     networkManager = new QNetworkAccessManager(this);
+    cookieJar = new Cookies();
+    networkManager->setCookieJar(cookieJar);
+
     connect(networkManager, SIGNAL(finished(QNetworkReply*)), this,
             SLOT(serviceRequestFinished(QNetworkReply*)));
 }
 
 void ACRCloud::serviceRequestFinished(QNetworkReply *networkReply)
 {
+    QJsonObject s;
+    s.insert("status", QJsonValue(QString("ERROR")));
     QByteArray bytes = networkReply->readAll();
-    QString str = QString::fromUtf8(bytes.data(), bytes.size());
+    QString strReply = QString::fromUtf8(bytes.data(), bytes.size());
     int statusCode = networkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    qDebug() << statusCode << str;
+    if( statusCode == 200)
+    {
+        qDebug() << strReply;
+        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
+        QJsonObject jsonObject = jsonResponse.object();
+        if( jsonObject["status"].toObject()["code"].toInt() == 0)
+        {
+            QJsonValue music = jsonObject["metadata"].toObject()["music"];
+            QJsonArray song = music.toArray();
 
+            s.insert("title", song[0].toObject()["title"].toString());
+            s.insert("artist",song[0].toObject()["artists"].toArray()[0].toObject()["name"].toString());
+            s.insert("status", QString("OK"));
+        }
+    }
+    qDebug() << networkReply->readAll();
+    qDebug() << "getAllCookies: " << cookieJar->getAllCookies();
+    emit songFound(s);
 }
 
 void ACRCloud::loadSettings(QString configurationFilePath)
@@ -35,45 +56,36 @@ void ACRCloud::loadSettings(QString configurationFilePath)
 
 int ACRCloud::sendRequest(QString mp3FilePath)
 {
-    //QDateTime timestamp = QDateTime::currentDateTime();
     QDateTime timestamp = QDateTime::fromMSecsSinceEpoch(1436220000);
-    qDebug() << (int)timestamp.isValid();
-    qDebug() << QString::number(timestamp.toMSecsSinceEpoch());
-    qDebug() << timestamp.toMSecsSinceEpoch() << "\n\n\n";
-    //return -1;
     QString stringToSign = method + "\n"
             + uri + "\n"
             + account_access_key + "\n"
             + dataType + "\n"
             + signatureVersion + "\n"
             + QString::number(timestamp.toMSecsSinceEpoch());
-    qDebug() << stringToSign << "\n";
+    stringToSign = stringToSign.replace("+", "%2B");
     QString signature = Crypto::hmacSha1(account_access_key.toUtf8(), stringToSign.toUtf8());
-    QFile *mp3FileName = new QFile(mp3FilePath);
+    QFile mp3FileName(mp3FilePath);
 
-    if( !mp3FileName->exists()) return 1;
-    if( !mp3FileName->open(QIODevice::ReadOnly)) return 2;
+    if( !mp3FileName.exists()) return 1;
+    if( !mp3FileName.open(QIODevice::ReadOnly)) return 2;
 
-    QString fileContent;
-    QTextStream ts(&fileContent, QIODevice::ReadOnly);
-    fileContent.append(ts.readAll());
+    QByteArray fileContent = mp3FileName.readAll();
+    fileContent = fileContent.toBase64();
+    QString fContent = QString(fileContent);
+    fContent = fContent.replace("+", "%2B");
+    mp3FileName.close();
 
     QUrlQuery postData;
     postData.addQueryItem("data_type", dataType);
     postData.addQueryItem("signature_version", signatureVersion);
     postData.addQueryItem("access_key", account_access_key);
-    postData.addQueryItem("sample", fileContent.toUtf8().toBase64());
-    postData.addQueryItem("sample_bytes", QString::number(mp3FileName->size()));
+    postData.addQueryItem("sample", fContent);
+    postData.addQueryItem("sample_bytes", QString::number(mp3FileName.size()));
     postData.addQueryItem("signature", signature.replace('+', "%2B").toUtf8());
     postData.addQueryItem("timestamp", QString::number(timestamp.toMSecsSinceEpoch()));
 
-    qDebug() << signature;
-    qDebug() << postData.hasQueryItem("sample");
-    qDebug() << postData.query(QUrl::EncodeUnicode);
+    networkManager->post(request, postData.query(QUrl::FullyEncoded).toUtf8());
 
-    //networkManager->post(request, postData.query(QUrl::FullyEncoded).toUtf8());
-
-
-    //qDebug() << headerFields.query(QUrl::FullyEncoded).toUtf8();
     return 0;
 }

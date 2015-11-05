@@ -8,6 +8,7 @@
 #include <QWebView>
 #include <QTimer>
 #include <QTime>
+#include <QDir>
 #include "bass.h"
 #include "html5applicationviewer/html5applicationviewer.h"
 #include "acrcloud.h"
@@ -17,7 +18,8 @@ class Player : public Html5ApplicationViewer
     Q_OBJECT
 public:
     explicit Player(QWidget *parent = 0);
-    static FILE *recordFile;
+    static FILE *recordFileH;
+    static QString recordFilePath;
     static bool isRecording;
     static const int recordTime;
 
@@ -35,10 +37,12 @@ private slots:
     void addToJavaScript();
     bool PrebufTimerProc();
     void stopRecording();
+    void songFound(QJsonObject song);
 
 public slots:
     void play(QString stationId="unknown");
     void setVolume(float volume);
+    float getValue();
     void stop();
     void record();
 };

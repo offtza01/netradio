@@ -13,7 +13,6 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-
     Player viewer;
 
     viewer.setOrientation(Html5ApplicationViewer::ScreenOrientationAuto);
@@ -26,6 +25,7 @@ int main(int argc, char *argv[])
     #ifdef QT_DEBUG
     qDebug() << "Running a debug build";
     viewer.webView()->page()->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+    viewer.webView()->page()->settings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls, true);
     QWebInspector inspector;
     inspector.setPage(viewer.webView()->page());
     inspector.setVisible(true);
@@ -38,8 +38,13 @@ int main(int argc, char *argv[])
     viewer.loadFile(QLatin1String("html/index.html"));
     viewer.webView()->setAcceptHoverEvents(true);
 
-    //int x = (screenGeometry.width()-mainWindow->width()) / 2;
-    //int y = (screenGeometry.height()-mainWindow->height()) / 2;
+    QWebSettings* settings = QWebSettings::globalSettings();
+    settings->setThirdPartyCookiePolicy(QWebSettings::AllowThirdPartyWithExistingCookies);
+    settings->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    settings->setOfflineStoragePath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation));
+    settings->setAttribute(QWebSettings::PrivateBrowsingEnabled,true);
+    qDebug() << QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+
     viewer.show();
     return app.exec();
 }

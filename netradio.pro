@@ -16,7 +16,8 @@ QT += network
 SOURCES += main.cpp \
     player.cpp \
     acrcloud.cpp \
-    crypto.cpp
+    crypto.cpp \
+    cookies.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(html5applicationviewer/html5applicationviewer.pri)
@@ -26,7 +27,8 @@ HEADERS += \
     bass.h \
     player.h \
     acrcloud.h \
-    crypto.h
+    crypto.h \
+    cookies.h
 
 RESOURCES += \
     resource.qrc

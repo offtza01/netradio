@@ -1,7 +1,8 @@
 #include "player.h"
 
-FILE * Player::recordFile = NULL;
-const int Player::recordTime = 10;
+FILE * Player::recordFileH = NULL;
+QString Player::recordFilePath = NULL;
+const int Player::recordTime = 12;
 bool Player::isRecording = false;
 
 
@@ -9,6 +10,7 @@ bool Player::isRecording = false;
 Player::Player(QWidget *parent) :Html5ApplicationViewer(parent) {
     QObject::connect(webView()->page()->mainFrame(),
             SIGNAL(javaScriptWindowObjectCleared()), SLOT(addToJavaScript()));
+
     playStatus = false;
     if (HIWORD(BASS_GetVersion())!=BASSVERSION) {
             return;
@@ -24,9 +26,25 @@ Player::Player(QWidget *parent) :Html5ApplicationViewer(parent) {
     playList.insert("3", "http://stream3.polskieradio.pl:8904/;stream");
     playList.insert("4", "http://mp3.polskieradio.pl:8906/;stream");
     playList.insert("antyradio", "http://ant-waw.cdn.eurozet.pl:8602/;stream");
-    Player::recordFile = NULL;
-
     acr.loadSettings();
+    QObject::connect(&acr, SIGNAL(songFound(QJsonObject)),
+                     this, SLOT(songFound(QJsonObject)));
+}
+
+void Player::songFound(QJsonObject song)
+{
+    QJsonDocument doc(song);
+    QByteArray bytes = doc.toJson();
+
+    if( song.value("status").toString() == "OK")
+    {
+        webView()->page()->mainFrame()->evaluateJavaScript(QString("setRecordNotice(\"Utwór rozpoznano!\")"));
+        webView()->page()->mainFrame()->evaluateJavaScript(QString("enableYT("+ QString::fromUtf8(bytes) +")"));
+    }
+    else
+    {
+        webView()->page()->mainFrame()->evaluateJavaScript(QString("setRecordNotice(\"Utwór nie został rozpoznany :(\")"));
+    }
 }
 
 
@@ -64,15 +82,17 @@ bool Player::PrebufTimerProc()
 void CALLBACK Player::MyDownload(const void *buffer, DWORD length, void *user)
 {
     if( isRecording == false) return;
-    if (!recordFile){
-        recordFile=fopen("afile.mp3", "wb"); // create the file
+    if (!recordFileH){
+        recordFilePath = QDir::tempPath() + "/_netradio_" + QString::number(qrand());
+        qDebug() << recordFilePath;
+        recordFileH = fopen(recordFilePath.toStdString().c_str(), "wb");
     }
     if (!buffer){
-        fclose(recordFile); // finished downloading
+        fclose(recordFileH); // finished downloading
     }
     else
     {
-        fwrite(buffer, 1, length, recordFile);
+        fwrite(buffer, 1, length, recordFileH);
     }
 }
 
@@ -92,7 +112,6 @@ void Player::play(QString stationId) {
         return;
         //return QString("Station not found");
     }
-    qDebug() << "click " << playList.value(stationId) << "transform: " << playList.value(stationId).toStdString().c_str() << "\n";
 
     HSTREAM stream = BASS_StreamCreateURL(playList.value(stationId).toStdString().c_str(),0,BASS_STREAM_BLOCK|BASS_STREAM_STATUS|BASS_STREAM_AUTOFREE,MyDownload,0);
 
@@ -138,11 +157,14 @@ void Player::setVolume(float volume)
     BASS_SetVolume(volume);
 }
 
+float Player::getValue()
+{
+    return BASS_GetVolume();
+}
+
 
 void Player::record()
 {
-    acr.sendRequest("afile.mp3");
-    return;
     stopRecording();
     QTimer::singleShot(recordTime*1000, this, SLOT(stopRecording()));
     isRecording = true;
@@ -152,10 +174,11 @@ void Player::stopRecording()
 {
     if( isRecording == false) return;
     isRecording = false;
-    if( recordFile != NULL)
+    if( recordFileH != NULL)
     {
-        fclose(recordFile);
-        acr.sendRequest("afile.mp3");
-        recordFile = NULL;
+        fclose(recordFileH);
+        webView()->page()->mainFrame()->evaluateJavaScript(QString("setRecordNotice(\"Wysyłanie zapytania...\")"));
+        acr.sendRequest(recordFilePath);
+        recordFileH = NULL;
     }
 }

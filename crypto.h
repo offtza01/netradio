@@ -10,6 +10,7 @@ class Crypto : public QObject
 public:
     explicit Crypto(QObject *parent = 0);
     static QString hmacSha1(QByteArray key, QByteArray baseString);
+
 signals:
 
 public slots:

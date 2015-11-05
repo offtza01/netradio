@@ -6,6 +6,10 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 #include <QSettings>
 #include <QDateTime>
 #include <QTime>
@@ -13,6 +17,7 @@
 #include <QFile>
 
 #include "crypto.h"
+#include "cookies.h"
 
 class ACRCloud : public QObject
 {
@@ -21,6 +26,7 @@ public:
     explicit ACRCloud(QObject *parent = 0);
     void loadSettings(QString configurationFilePath="netradio.conf");
     int sendRequest(QString mp3FilePath);
+
     QUrl reqUrl;
     QString method;
     QString uri;
@@ -31,8 +37,9 @@ private:
     static const QString account_access_secret;
     QNetworkRequest request;
     QNetworkAccessManager *networkManager;
+    Cookies *cookieJar;
 signals:
-
+    void songFound(QJsonObject song);
 public slots:
     void serviceRequestFinished(QNetworkReply*);
 };

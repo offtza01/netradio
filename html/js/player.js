@@ -3,7 +3,7 @@ PlayerHud.prototype = {
     playingObj: null,
     playingUid: null,
     isPlaying: 0,
-    volume: 0,
+    volume: 100,
 
     updateBufforStatus: function(status) {
         this.playingObj.find('.status').text(status);
@@ -38,6 +38,20 @@ PlayerHud.prototype = {
     setVolume: function(volume) {
         this.volume = volume;
         Player.setVolume(volume);
+    },
+
+    getValue: function() {
+        try
+        {
+            this.value = Player.getValue();
+        }
+        catch(err)
+        {
+            //QT object not loaded
+            console.log("Object or method not exists: " + err);
+            this.value = 100;
+        }
+        return this.value;
     },
 
     record: function(){

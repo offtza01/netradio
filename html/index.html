@@ -7,10 +7,47 @@
         <script type="text/javascript" src="js/jquery/jquery.min.js"></script>
         <script type="text/javascript" src="js/jquery-ui/jquery-ui.js"></script>
         <script type="text/javascript" src="js/player.js"></script>
+        <script type="text/javascript" src="js/ytplayer.js"></script>
         <script type="text/javascript">
         var PlayerHud = new PlayerHud();
-        $( document ).ready(function() {
+        function play(elem)
+        {
+            PlayerHud.play(elem);
+            $('#record-controls').slideDown('slow');
+            enableExternalContent(elem);
+        }        
 
+        function enableYT(song)
+        {
+            $('.external-content').hide();
+            searchVideo({list: song.title + ' ' + song.artist,
+                                 listType: 'search',
+                                 index: 0,
+                                 suggestedQuality: 'large'});
+            PlayerHud.stop();
+            $('.youtube-content').show();
+        }
+
+        function enableExternalContent(elem)
+        {
+            var href = elem.attr("href");
+            console.log(href);
+            if (typeof href !== "undefined" && href !== false && href.length != 0)
+            {
+                $('.youtube-content').hide();
+                $('#external-content-view').attr("src", href);
+                $('.external-content').show();
+            }
+        }
+
+        function setRecordNotice(message)
+        {
+            $("#record-notice").hide();
+            $("#record-notice").text(message);
+            $("#record-notice").slideDown("slow");
+        }
+
+        $( document ).ready(function() {
             $(".radiostation-logo").mouseover(function(){
                 if( PlayerHud.isPlaying == 0)
                 {
@@ -36,47 +73,43 @@
             });
 
             $(".radiostation-logo").click(function(e){
+                e.preventDefault();
                 if( PlayerHud.isPlaying == 0)
                 {
                     $(this).find('.status').text(0);
                     $(this).find('.status').show("fast");
 
                     try {
-                            PlayerHud.play($(this));
+                        play($(this));
                     }
                     catch(err) {
                         console.log("Object or method not exists: " + err);
                     }
-
                 }
                 else
                 {
                     if( PlayerHud.getClicked().attr('data-uid') == $(this).attr('data-uid'))
                     {
                         PlayerHud.stop();
+                        $('#record-controls').hide();
                     }
                     else
                     {
                         $(this).find('.status').text(0);
                         $(this).find('.status').show("fast");
-                        PlayerHud.play($(this));
+                        play($(this));
                     }
                 }
             });
-            $('#record').click(function(e){
-                if( PlayerHud.isPlaying == 1)
-                {
-                    PlayerHud.record();
-                }
-            });
+
             $( "#slider" ).slider({
-                value: 60,
+                value: PlayerHud.getValue(),
                 orientation: "vertical",
                 range: "min",
                 animate: true,
                 min: 0,
                 max: 1,
-                step: 0.1,
+                step: 0.05,
                 slide: function( event, ui ) {
                   $( "#current-volume" ).val( ui.value*100 );
                   PlayerHud.setVolume(ui.value);
@@ -84,6 +117,14 @@
             });
             $( "#current-volume" ).val( $( "#slider" ).slider( "value" )*100 );
 
+            $('#recordBtn').click(function(e){
+                e.preventDefault();
+                if( PlayerHud.isPlaying == 1)
+                {
+                    PlayerHud.record();
+                    setRecordNotice("Nagrywanie...");
+                }
+            });
         });
         </script>
     </head>
@@ -92,15 +133,26 @@
             <a id="jedynka" class="radiostation-logo" data-uid="1"><span class="status"></span><span class="stop hidden"></span></a>
             <a id="dwojka" class="radiostation-logo" data-uid="2"><span class="status"></span><span class="stop hidden"></span></a>
             <a id="trojka" class="radiostation-logo" data-uid="3"><span class="status"></span><span class="stop hidden"></span></a>
-            <a id="czworka" class="radiostation-logo" data-uid="4"><span class="status"></span><span class="stop hidden"></span></a>
-            <a id="antyradio" class="radiostation-logo" data-uid="antyradio"><span class="status"></span><span class="stop hidden"></span></a>
+            <a id="czworka" class="radiostation-logo" data-uid="4" href="https://www.polskieradio.pl/10,Czworka"><span class="status"></span><span class="stop hidden"></span></a>
+            <a id="antyradio" class="radiostation-logo" data-uid="antyradio" href="http://wykop.pl"><span class="status"></span><span class="stop hidden"></span></a>
+        </div>
+        <div class="clear"></div>
+        <div id="record-controls" class="record-controls">
+            <span><a id="recordBtn" href="#" class="record-button"></a></span>
+            <div class="clear"></div>
+            <div id="record-notice" class="record-notice"></div>
         </div>
         <div class="controls">
-            <p>
-              <input type="text" id="current-volume" readonly>
-            </p>
             <div id="slider"></div>
-            <div id="record">Rec</div>
+            <p>
+              <input type="text" id="current-volume" readonly/>
+            </p>
+        </div>
+        <div id="content" class="content">
+            <div class="external-content hidden">
+                <iframe id="external-content-view"></iframe>
+            </div>
+            <div id="youtube" class="youtube-content hidden"></div>
         </div>
     </body>
 </html>
