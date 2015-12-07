@@ -7,7 +7,7 @@ DEPLOYMENTFOLDERS = folder_01
 INCLUDEPATH += $$PWD/lib
 CONSOLE += console
 CONFIG += static
-QT += network
+QT += network sql
 
 # Define TOUCH_OPTIMIZED_NAVIGATION for touch optimization and flicking
 #DEFINES += TOUCH_OPTIMIZED_NAVIGATION
@@ -17,7 +17,8 @@ SOURCES += main.cpp \
     player.cpp \
     acrcloud.cpp \
     crypto.cpp \
-    cookies.cpp
+    cookies.cpp \
+    api.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(html5applicationviewer/html5applicationviewer.pri)
@@ -28,7 +29,8 @@ HEADERS += \
     player.h \
     acrcloud.h \
     crypto.h \
-    cookies.h
+    cookies.h \
+    api.h
 
 RESOURCES += \
     resource.qrc

@@ -11,9 +11,11 @@
 #include <QDir>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QDesktopServices>
 #include "bass.h"
 #include "html5applicationviewer/html5applicationviewer.h"
 #include "acrcloud.h"
+#include "api.h"
 
 class Player : public Html5ApplicationViewer
 {
@@ -34,6 +36,7 @@ private:
     static void StatusProc(const void *buffer, DWORD length, void *user);
     static void MyDownload(const void *buffer, DWORD length, void *user);
     ACRCloud acr;
+    API api;
 
 private slots:
     void addToJavaScript();

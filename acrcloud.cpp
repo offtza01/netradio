@@ -1,14 +1,13 @@
 #include "acrcloud.h"
 
-const QString ACRCloud::account_access_key = "xxx";
-const QString ACRCloud::account_access_secret = "xxx";
+const QString ACRCloud::account_access_key = "XXX";
+const QString ACRCloud::account_access_secret = "XXX";
 
 ACRCloud::ACRCloud(QObject *parent) :
     QObject(parent)
 {
     networkManager = new QNetworkAccessManager(this);
     cookieJar = new Cookies();
-    networkManager->setCookieJar(cookieJar);
 
     connect(networkManager, SIGNAL(finished(QNetworkReply*)), this,
             SLOT(serviceRequestFinished(QNetworkReply*)));

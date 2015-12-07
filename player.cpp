@@ -10,7 +10,7 @@ bool Player::isRecording = false;
 Player::Player(QWidget *parent) :Html5ApplicationViewer(parent) {
     QObject::connect(webView()->page()->mainFrame(),
             SIGNAL(javaScriptWindowObjectCleared()), SLOT(addToJavaScript()));
-
+    api.sync();
     playStatus = false;
     if (HIWORD(BASS_GetVersion())!=BASSVERSION) {
             return;
@@ -39,7 +39,9 @@ void Player::songFound(QJsonObject song)
     if( song.value("status").toString() == "OK")
     {
         webView()->page()->mainFrame()->evaluateJavaScript(QString("setRecordNotice(\"Utwór rozpoznano!\")"));
-        webView()->page()->mainFrame()->evaluateJavaScript(QString("enableYT("+ QString::fromUtf8(bytes) +")"));
+        //webView()->page()->mainFrame()->evaluateJavaScript(QString("enableYT("+ QString::fromUtf8(bytes) +")"));
+
+        QDesktopServices::openUrl(QUrl("http://www.youtube.com/results?q=" + song.value("title").toString() + ' ' + song.value("artist").toString()));
     }
     else
     {
@@ -85,7 +87,6 @@ void CALLBACK Player::MyDownload(const void *buffer, DWORD length, void *user)
     if( isRecording == false) return;
     if (!recordFileH){
         recordFilePath = QDir::tempPath() + "/_netradio_" + QString::number(qrand());
-        qDebug() << recordFilePath;
         recordFileH = fopen(recordFilePath.toStdString().c_str(), "wb");
     }
     if (!buffer){
@@ -111,7 +112,6 @@ void Player::play(QString stationId) {
     if( !playList.contains(stationId))
     {
         return;
-        //return QString("Station not found");
     }
 
     HSTREAM stream = BASS_StreamCreateURL(playList.value(stationId).toStdString().c_str(),0,BASS_STREAM_BLOCK|BASS_STREAM_STATUS|BASS_STREAM_AUTOFREE,MyDownload,0);
@@ -142,7 +142,6 @@ void Player::play(QString stationId) {
             qDebug() << meta;
             QRegularExpression rx("StreamTitle='(.+)';StreamUrl");
             QRegularExpressionMatch match = rx.match(QString(meta));
-            QString retMsg;
             if (match.hasMatch()) {
                 qDebug() << match.captured(1);
                 webView()->page()->mainFrame()->evaluateJavaScript("setRadiostationTag('"+ match.captured(1) +"')");

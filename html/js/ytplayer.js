@@ -39,5 +39,6 @@ function stopVideo() {
 }
 
 function searchVideo(obj) {
+    console.log(obj);
     YTplayer.loadPlaylist(obj);
 }
