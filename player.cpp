@@ -29,6 +29,13 @@ Player::Player(QWidget *parent) :Html5ApplicationViewer(parent) {
     acr.loadSettings();
     QObject::connect(&acr, SIGNAL(songFound(QJsonObject)),
                      this, SLOT(songFound(QJsonObject)));
+    QObject::connect(&api, SIGNAL(updateReady(QList<Radiostation>)),
+                     this, SLOT(songFound(QList<Radiostation>)));
+}
+
+void Player::updateFound(QList<Radiostation> radiostations)
+{
+
 }
 
 void Player::songFound(QJsonObject song)

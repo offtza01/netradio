@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     acrcloud.cpp \
     crypto.cpp \
     cookies.cpp \
-    api.cpp
+    api.cpp \
+    radiostation.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(html5applicationviewer/html5applicationviewer.pri)

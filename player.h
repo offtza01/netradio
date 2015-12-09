@@ -43,6 +43,7 @@ private slots:
     bool PrebufTimerProc();
     void stopRecording();
     void songFound(QJsonObject song);
+    void updateFound(QList<Radiostation>);
 
 public slots:
     void play(QString stationId="unknown");

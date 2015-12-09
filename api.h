@@ -11,6 +11,9 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QtSql/QtSql>
+#include <QDateTime>
+
+#include <radiostation.h>
 
 class API : public QObject
 {
@@ -20,16 +23,22 @@ public:
     void checkVersion();
     void updateLibrary();
     bool isAvaiable();
-    void getLocalVersion();
+    QDateTime getLocalVersion();
     void sync();
+    QList<Radiostation> getRadiostations();
 private:
     QNetworkAccessManager *networkManager;
     QSqlDatabase db;
     static const QString apiAddress;
     int downloadingStatus;
     QString downloadingAction;
+    QDateTime localVersion;
+    QList<Radiostation> radiostations;
+    VersionControl vc;
+    void updateCurrentLibrary();
+    void updateCurrentVersion();
 signals:
-
+    void updateReady(QList<Radiostation>);
 public slots:
     void serviceRequestFinished(QNetworkReply*);
 

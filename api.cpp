@@ -13,9 +13,10 @@ API::API(QObject *parent) :
     db.setDatabaseName("radiostations.sq3");
     db.open();
 
-
     connect(networkManager, SIGNAL(finished(QNetworkReply*)), this,
             SLOT(serviceRequestFinished(QNetworkReply*)));
+
+    localVersion = getLocalVersion();
 }
 
 bool API::isAvaiable()
@@ -29,46 +30,109 @@ void API::serviceRequestFinished(QNetworkReply *networkReply)
     s.insert("status", QJsonValue(QString("ERROR")));
     QString strReply = (QString)networkReply->readAll();
     int statusCode = networkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    downloadingStatus = 0;
     if( statusCode == 200)
     {
-        qDebug() << downloadingAction;
         if( downloadingAction == "update")
         {
-            qDebug() << "UPDATE";
+            downloadingAction = "";
             QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
             QJsonObject jsonObject = jsonResponse.object();
-            qDebug() << jsonObject["0"].toObject();
+            foreach(QJsonValue radio, jsonObject)
+            {
+                Radiostation r;
+                r.setHref(radio.toObject()["href"].toString());
+                r.setHtmlUid(radio.toObject()["html_uid"].toString());
+                r.setIcon(radio.toObject()["icon"].toString());
+                r.setIconFile(radio.toObject()["iconFile"].toString().toUtf8());
+                r.setName(radio.toObject()["name"].toString());
+                r.setStreamAddress(radio.toObject()["stream_address"].toString());
+                r.setUid(radio.toObject()["uid"].toString());
+                radiostations.append(r);
+                updateCurrentVersion();
+                updateCurrentLibrary();
+                emit updateReady(radiostations);
+            }
         }
         if( downloadingAction == "version")
         {
-
-            qDebug() << "UPDATE";
-            qDebug() << strReply;
+            downloadingAction = "";
+            QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
+            QJsonObject jsonObject = jsonResponse.object();
+            if( !jsonObject["release_date"].isUndefined())
+            {
+                QDateTime apiVersion =  QDateTime::fromString(jsonObject["release_date"].toString(), "yyyy-MM-ddTHH:mm:ss");
+                if( apiVersion != localVersion)
+                {
+                    vc.setHash(jsonObject["hash"].toString());
+                    vc.setIsValid(jsonObject["is_valid"].toInt());
+                    vc.setReleaseDate(QDateTime::fromString(jsonObject["release_date"].toString()));
+                    vc.setIsSet(true);
+                    updateLibrary();
+                }
+            }
         }
-        downloadingStatus = 0;
     }
 
 }
 
-void API::getLocalVersion()
+void API::updateCurrentLibrary()
 {
     if( !db.isOpen()) return;
+    QSqlQuery query(db);
+    query.exec("DELETE FROM radiostations");
+
+    foreach(Radiostation radio, radiostations)
+    {
+        query.prepare("INSERT INTO radiostations (href, html_uid, icon, name, stream_address, uid) VALUES (:href, :html_uid, :icon, :name, :stream_address, :uid)");
+        query.bindValue(":href", radio.getHref());
+        query.bindValue(":html_uid", radio.getHtmlUid());
+        query.bindValue(":icon", radio.getIcon());
+        query.bindValue(":name", radio.getName());
+        query.bindValue(":stream_address", radio.getStreamAddress());
+        query.bindValue(":uid", radio.getUid());
+        query.exec();
+        QFile file(radio.getIcon());
+        file.open(QIODevice::WriteOnly);
+        QDataStream out(&file);
+        out << radio.getIconFile();
+        file.close();
+
+    }
+}
+
+
+void API::updateCurrentVersion()
+{
+    if( !vc.getIsSet()) return;
+    if( !db.isOpen()) return;
+    QSqlQuery query(db);
+    query.prepare("INSERT INTO current_version (hash, release_date) VALUES (:hash, :release_date)");
+    query.bindValue(":hash", vc.getHash());
+    query.bindValue(":release_date", vc.getReleaseDate());
+    query.exec();
+}
+
+QDateTime API::getLocalVersion()
+{
+    if( !db.isOpen()) return QDateTime::currentDateTime();
 
     QSqlQuery query(db);
     query.exec("SELECT * FROM current_version ORDER BY idcurrent_version DESC LIMIT 1");
     if( query.next())
     {
-        qDebug() << query.value(0);
+        qDebug() << query.value(0).toString();
+        return QDateTime::fromString(query.value(0).toString());
     }
     else
     {
-        return 0;
+        return QDateTime::currentDateTime();
     }
 }
 
 void API::sync()
 {
-    getLocalVersion();
+    checkVersion();
 }
 
 void API::checkVersion()
@@ -79,7 +143,7 @@ void API::checkVersion()
     downloadingStatus = 1;
     downloadingAction = (QString)"version";
     request.setUrl(url);
-    QNetworkReply *currentReply = networkManager->get(request);
+    networkManager->get(request);
 }
 
 void API::updateLibrary()
@@ -90,5 +154,10 @@ void API::updateLibrary()
     request.setUrl(url);
     downloadingStatus = 1;
     downloadingAction = (QString)"update";
-    QNetworkReply *currentReply = networkManager->get(request);
+    networkManager->get(request);
+}
+
+QList<Radiostation> API::getRadiostations()
+{
+    return radiostations;
 }
